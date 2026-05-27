@@ -66,7 +66,7 @@ class IntellcomWooSync {
 
                 <p>
                     Only products imported with <code>source = intelcom</code> will be updated.<br>
-                    WooCommerce SKU must match API <code>code_id</code>.
+                    WooCommerce SKU must match API <code>code_id</code> (INT- prefix is stripped automatically).
                 </p>
 
                 <form method="POST" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
@@ -184,11 +184,18 @@ class IntellcomWooSync {
                 continue;
             }
 
-            if (!isset($lookup[$sku])) {
+            // Strip INT- prefix for API lookup only
+            $lookup_sku = preg_replace('/^int-/', '', $sku);
+
+            if (empty($lookup_sku)) {
                 continue;
             }
 
-            $api_product = $lookup[$sku];
+            if (!isset($lookup[$lookup_sku])) {
+                continue;
+            }
+
+            $api_product = $lookup[$lookup_sku];
 
             $price = floatval($api_product['price'] ?? 0);
 
